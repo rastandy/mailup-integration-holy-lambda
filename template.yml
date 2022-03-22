@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Mailup integration webhooks and lambdas for the Communication Office
+
+Parameters:
+  Timeout:
+    Type: Number
+    Default: 40
+  MemorySize:
+    Type: Number
+    Default: 128
+  Entrypoint:
+    Type: String
+    Default: cmcc.mailup.core
+
+Globals:
+  Function:
+    Timeout: !Ref Timeout
+    MemorySize: !Ref MemorySize
+    Environment:
+      Variables:
+        HL_ENTRYPOINT: !Ref Entrypoint
+
+Resources:
+  BabashkaDepsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: mailup-integration-deps
+      ContentUri: ./.holy-lambda/bb-clj-deps
+
+  MailupNewsletterSubcriptionWebhook:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: MailupNewsletterSubcriptionWebhook
+      Runtime: provided
+      Handler: cmcc.mailup.core.MailupNewsletterSubcriptionWebhook
+      CodeUri: src
+      Layers:
+        - !Ref BabashkaDepsLayer
+        - arn:aws:lambda:eu-central-1:719747043315:layer:holy-lambda-babashka-runtime-amd64:1
+      # For docker based deployments use:
+      # PackageType: Image
+      # and remove Runtime + CodeUri + Handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref MailupApi
+            Path: /newsletter-webhook
+            Method: POST
+    # For docker based deployments
+    # Metadata:
+    #   Dockerfile: Dockerfile
+    #   DockerContext: .
+    #   DockerTag: v1
+
+  MailupApi:
+    Type: AWS::Serverless::HttpApi
+
+Outputs:
+  ExampleLambdaEndpoint:
+    Description: Endpoint for MailupNewsletterSubcriptionWebhook
+    Value:
+      Fn::Sub: https://${MailupApi}.execute-api.${AWS::Region}.amazonaws.com
