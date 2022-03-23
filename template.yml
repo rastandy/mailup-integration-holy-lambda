@@ -34,6 +34,7 @@ Resources:
     Properties:
       FunctionName: MailupNewsletterSubcriptionWebhook
       Runtime: provided
+      MemorySize: 256
       Handler: cmcc.mailup.core.MailupNewsletterSubcriptionWebhook
       CodeUri: src
       Layers:
