@@ -2,8 +2,11 @@
         {:git/url   "https://github.com/FieryCod/holy-lambda"
          :deps/root "./modules/holy-lambda-babashka-tasks"
          :sha       "aad552d90f9b87929755a13641a8e73468430ba0"}
-        io.github.FieryCod/holy-lambda {:mvn/version "0.6.6"}
-        ring/ring-codec                {:mvn/version "1.2.0"}}
+        {clj-http-lite
+         {:git/url "https://github.com/borkdude/clj-http-lite"
+          :sha "f44ebe45446f0f44f2b73761d102af3da6d0a13e"}}
+        io.github.FieryCod/holy-lambda  {:mvn/version "0.6.6"}
+        ring/ring-codec                 {:mvn/version "1.2.0"}}
 
  ;; Minimal babashka version which should be used in conjuction with holy-lambda
  :min-bb-version "0.3.7"

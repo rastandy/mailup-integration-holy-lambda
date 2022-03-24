@@ -60,7 +60,7 @@ Resources:
     Type: AWS::Serverless::HttpApi
 
 Outputs:
-  ExampleLambdaEndpoint:
+ LambdaEndpoint:
     Description: Endpoint for MailupNewsletterSubcriptionWebhook
     Value:
       Fn::Sub: https://${MailupApi}.execute-api.${AWS::Region}.amazonaws.com

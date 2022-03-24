@@ -6,7 +6,16 @@
    [fierycod.holy-lambda.agent :as agent]
    [fierycod.holy-lambda.core :as h]
    [ring.util.codec :refer [form-decode]]
-   [clojure.walk :refer keywordize-keys]))
+   [clojure.walk :refer [keywordize-keys]]))
+
+(def mailup-oauth2
+  {:authorization-uri "https://services.mailup.com/Authorization/OAuth/LogOn"
+   :access-token-uri "https://services.mailup.com/Authorization/OAuth/Token"
+   :client-id ""
+   :client-secret ""
+   :access-query-param :access_token
+   :scope []
+   :grant-type "password"})
 
 ;; optionally, provide runtime specific implementations if needed
 (defn say-hello
@@ -20,11 +29,21 @@
 (defn MailupNewsletterSubcriptionWebhook
   "I can run on Java, Babashka or Native runtime..."
   [{:keys [event ctx] :as request}]
+  (let [auth-req (oauth2/make-auth-request mailup-oauth2 "")
+        ;; auth-resp is a keyword map of the query parameters added to the
+        ;; redirect-uri by the authorization server
+        ;; e.g. {:code "abc123"}
+        access-token (oauth2/get-access-token mailup-oauth2 {} auth-req)
+        result (oauth2/post (str "https://services.mailup.com/API/v1.1/Rest/ConsoleService.svc/Console/List/"
+                                 14 "/Recipient")
+                            {:oauth2 access-token})]
 
-  (println (str "Body: " (-> event :body base64decode form-decode keywordize-keys)))
+    ;; (println (str "Body: " (-> event :body base64decode form-decode keywordize-keys)))
 
-  ;; return a successful plain text response. See also, hr/json
-  (hr/json {:message "Ok"}))
+    (println "Result: " result)
+
+    ;; return a successful plain text response. See also, hr/json
+    (hr/json {:message "Ok"})))
 
 ;; Specify the Lambda's entry point as a static main function when generating a class file
 (h/entrypoint [#'MailupNewsletterSubcriptionWebhook])
